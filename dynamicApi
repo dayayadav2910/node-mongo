@@ -1,0 +1,45 @@
+// Dynamic API in mongoose
+const express = require("express");
+const products = require('./product');
+const app = express();
+require('./config');
+
+
+app.use(express.json());
+app.post('/create', async (req,resp)=>{
+    let data = new products(req.body); 
+    let result = await data.save();
+    resp.send(result); 
+})
+
+app.get('/list', async (req,resp)=>{
+    let data = await products.find()
+    resp.send(data);
+})
+
+
+app.delete('/delete/:_id', async  (req,resp)=>{
+    let data = await products.deleteOne(req.params);
+    resp.send(data);
+})
+
+
+// Search API 
+
+app.get('/search/:key',async (req,resp)=>{
+    let data =  await products.find(
+        {
+            "$or":[
+                {"name": {$regex:req.params.key}},
+                {"brand":{$regex:req.params.key}},
+                // {"price":{$regex:req.params.key}},
+            ]
+        }
+    )
+    resp.send(data)
+})
+
+
+app.listen(5000);
+
+
